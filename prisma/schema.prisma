@@ -1,0 +1,195 @@
+// Prisma schema for the Family Activity Recommender MVP.
+// Provider: PostgreSQL (PostGIS / radius search can be added later).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PersonType {
+  adult
+  child
+}
+
+enum PetType {
+  dog
+  cat
+  other
+}
+
+enum FeedbackType {
+  fits
+  not_fitting
+  more_like_this
+  never_again
+}
+
+enum EnergyLevel {
+  quiet
+  normal
+  action
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  familyProfiles FamilyProfile[]
+  reviews        ActivityReview[]
+}
+
+model FamilyProfile {
+  id               String   @id @default(cuid())
+  userId           String
+  name             String
+  homeLocationName String?
+  homeLatitude     Float?
+  homeLongitude    Float?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persons            Person[]
+  pets               Pet[]
+  mobilityPreset     MobilityPreset?
+  budgetPreset       BudgetPreset?
+  reviews            ActivityReview[]
+  recommendationRuns RecommendationRun[]
+}
+
+model Person {
+  id              String     @id @default(cuid())
+  familyProfileId String
+  name            String
+  type            PersonType
+  birthDate       DateTime?
+  notes           String?
+
+  familyProfile FamilyProfile @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+}
+
+model Pet {
+  id              String  @id @default(cuid())
+  familyProfileId String
+  name            String
+  type            PetType
+  mustJoinDefault Boolean @default(false)
+  notes           String?
+
+  familyProfile FamilyProfile @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+}
+
+model MobilityPreset {
+  id                String  @id @default(cuid())
+  familyProfileId   String  @unique
+  hasCar            Boolean @default(true)
+  publicTransportOk Boolean @default(true)
+  bikeOk            Boolean @default(false)
+  strollerRequired  Boolean @default(false)
+  maxTravelMinutes  Int     @default(45)
+  notes             String?
+
+  familyProfile FamilyProfile @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+}
+
+model BudgetPreset {
+  id              String  @id @default(cuid())
+  familyProfileId String  @unique
+  maxCostTotal    Int? // null = "egal"
+  preferFree      Boolean @default(false)
+  notes           String?
+
+  familyProfile FamilyProfile @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id                       String   @id @default(cuid())
+  name                     String
+  description              String
+  category                 String
+  address                  String?
+  latitude                 Float?
+  longitude                Float?
+  estimatedCost            Int      @default(0) // EUR total for the family, rough estimate
+  estimatedDurationMinutes Int      @default(120)
+  minChildAgeMonths        Int      @default(0)
+  maxChildAgeMonths        Int      @default(216) // up to ~18y
+  dogFriendly              Boolean  @default(false)
+  strollerFriendly         Boolean  @default(false)
+  rainSafe                 Boolean  @default(false)
+  indoor                   Boolean  @default(false)
+  outdoor                  Boolean  @default(false)
+  foodAvailable            Boolean  @default(false)
+  openingHoursText         String?
+  websiteUrl               String?
+  source                   String? // origin / reliability note for the data
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  tags    ActivityTag[]
+  reviews ActivityReview[]
+  results RecommendationResult[]
+}
+
+model ActivityTag {
+  id         String @id @default(cuid())
+  activityId String
+  tag        String
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, tag])
+  @@index([tag])
+}
+
+model ActivityReview {
+  id              String       @id @default(cuid())
+  userId          String
+  familyProfileId String
+  activityId      String
+  rating          Int? // optional 1-5
+  feedbackType    FeedbackType
+  comment         String?
+  createdAt       DateTime     @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyProfile FamilyProfile @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+  activity      Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([familyProfileId, activityId])
+}
+
+model RecommendationRun {
+  id               String      @id @default(cuid())
+  familyProfileId  String
+  requestedDate    DateTime    @default(now())
+  timeBudgetMinutes Int
+  maxBudget        Int?
+  maxTravelMinutes Int
+  dogMustJoin      Boolean     @default(false)
+  strollerRequired Boolean     @default(false)
+  energyLevel      EnergyLevel @default(normal)
+  weatherCondition String? // rain | sun | cold | hot | null
+  createdAt        DateTime    @default(now())
+
+  familyProfile FamilyProfile          @relation(fields: [familyProfileId], references: [id], onDelete: Cascade)
+  results       RecommendationResult[]
+}
+
+model RecommendationResult {
+  id                  String @id @default(cuid())
+  recommendationRunId String
+  activityId          String
+  score               Int
+  explanation         String
+  warnings            String? // JSON-encoded string[] for portability
+
+  recommendationRun RecommendationRun @relation(fields: [recommendationRunId], references: [id], onDelete: Cascade)
+  activity          Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}
