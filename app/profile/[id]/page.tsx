@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { Card } from "@/components/ui";
 import {
   addPersonAction,
   addPetAction,
@@ -12,9 +13,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const card = "rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3";
-const field = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
-const btn = "rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700";
+const btn = "btn-ghost px-4 py-2 text-sm";
 
 function ageLabel(birthDate: Date | null): string {
   if (!birthDate) return "";
@@ -33,12 +32,7 @@ export default async function ProfilePage({
 }) {
   const family = await prisma.familyProfile.findUnique({
     where: { id: params.id },
-    include: {
-      persons: true,
-      pets: true,
-      mobilityPreset: true,
-      budgetPreset: true,
-    },
+    include: { persons: true, pets: true, mobilityPreset: true, budgetPreset: true },
   });
   if (!family) notFound();
 
@@ -48,24 +42,27 @@ export default async function ProfilePage({
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/" className="text-sm text-slate-500 hover:underline">
+        <Link href="/" className="text-sm text-slate-400 transition hover:text-slate-200">
           ← Zurück
         </Link>
-        <h1 className="mt-1 text-xl font-bold">{family.name}</h1>
+        <h1 className="mt-2 font-display text-3xl font-bold text-white">{family.name}</h1>
         {family.homeLocationName && (
-          <p className="text-sm text-slate-500">📍 {family.homeLocationName}</p>
+          <p className="text-sm text-slate-400">📍 {family.homeLocationName}</p>
         )}
       </div>
 
       {/* Personen */}
-      <section className={card}>
-        <h2 className="font-semibold">Personen im Haushalt</h2>
-        <ul className="space-y-1">
+      <Card className="space-y-3">
+        <h2 className="font-display text-lg font-bold text-white">Personen im Haushalt</h2>
+        <ul className="space-y-1.5">
           {family.persons.map((p) => (
-            <li key={p.id} className="flex items-center justify-between text-sm">
-              <span>
-                {p.name}{" "}
-                <span className="text-slate-400">
+            <li
+              key={p.id}
+              className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm"
+            >
+              <span className="text-slate-200">
+                {p.type === "child" ? "🧒" : "🧑"} {p.name}{" "}
+                <span className="text-slate-500">
                   ({p.type === "child" ? "Kind" : "Erwachsen"}
                   {p.type === "child" && p.birthDate ? `, ${ageLabel(p.birthDate)}` : ""})
                 </span>
@@ -73,90 +70,83 @@ export default async function ProfilePage({
               <form action={deletePersonAction}>
                 <input type="hidden" name="familyProfileId" value={family.id} />
                 <input type="hidden" name="personId" value={p.id} />
-                <button className="text-xs text-red-500 hover:underline">entfernen</button>
+                <button className="text-xs text-rose-400 transition hover:text-rose-300">entfernen</button>
               </form>
             </li>
           ))}
           {family.persons.length === 0 && (
-            <li className="text-sm text-slate-400">Noch keine Personen.</li>
+            <li className="text-sm text-slate-500">Noch keine Personen.</li>
           )}
         </ul>
-        <form action={addPersonAction} className="flex flex-wrap gap-2 pt-2">
+        <form action={addPersonAction} className="flex flex-wrap gap-2 pt-1">
           <input type="hidden" name="familyProfileId" value={family.id} />
-          <input name="name" placeholder="Name" className={`${field} flex-1`} required />
-          <select name="type" className={field} defaultValue="child">
+          <input name="name" placeholder="Name" className="input-dark flex-1" required />
+          <select name="type" className="input-dark w-auto" defaultValue="child">
             <option value="adult">Erwachsen</option>
             <option value="child">Kind</option>
           </select>
-          <input
-            name="birthDate"
-            type="date"
-            className={field}
-            title="Geburtsdatum (nur bei Kindern)"
-          />
+          <input name="birthDate" type="date" className="input-dark w-auto" title="Geburtsdatum (nur bei Kindern)" />
           <button className={btn} type="submit">+ Person</button>
         </form>
-      </section>
+      </Card>
 
       {/* Haustiere */}
-      <section className={card}>
-        <h2 className="font-semibold">Haustiere</h2>
-        <ul className="space-y-1">
+      <Card className="space-y-3">
+        <h2 className="font-display text-lg font-bold text-white">Haustiere</h2>
+        <ul className="space-y-1.5">
           {family.pets.map((p) => (
-            <li key={p.id} className="flex items-center justify-between text-sm">
-              <span>
-                {p.name}{" "}
-                <span className="text-slate-400">
-                  ({p.type}
-                  {p.mustJoinDefault ? ", muss meist mit" : ""})
-                </span>
+            <li
+              key={p.id}
+              className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm"
+            >
+              <span className="text-slate-200">
+                {p.type === "dog" ? "🐕" : p.type === "cat" ? "🐈" : "🐾"} {p.name}{" "}
+                <span className="text-slate-500">({p.mustJoinDefault ? "muss meist mit" : p.type})</span>
               </span>
               <form action={deletePetAction}>
                 <input type="hidden" name="familyProfileId" value={family.id} />
                 <input type="hidden" name="petId" value={p.id} />
-                <button className="text-xs text-red-500 hover:underline">entfernen</button>
+                <button className="text-xs text-rose-400 transition hover:text-rose-300">entfernen</button>
               </form>
             </li>
           ))}
-          {family.pets.length === 0 && (
-            <li className="text-sm text-slate-400">Keine Haustiere.</li>
-          )}
+          {family.pets.length === 0 && <li className="text-sm text-slate-500">Keine Haustiere.</li>}
         </ul>
-        <form action={addPetAction} className="flex flex-wrap items-center gap-2 pt-2">
+        <form action={addPetAction} className="flex flex-wrap items-center gap-2 pt-1">
           <input type="hidden" name="familyProfileId" value={family.id} />
-          <input name="name" placeholder="Name" className={`${field} flex-1`} required />
-          <select name="type" className={field} defaultValue="dog">
+          <input name="name" placeholder="Name" className="input-dark flex-1" required />
+          <select name="type" className="input-dark w-auto" defaultValue="dog">
             <option value="dog">Hund</option>
             <option value="cat">Katze</option>
             <option value="other">Andere</option>
           </select>
-          <label className="flex items-center gap-1 text-xs">
-            <input type="checkbox" name="mustJoinDefault" /> muss mit
+          <label className="flex items-center gap-1.5 text-xs text-slate-300">
+            <input type="checkbox" name="mustJoinDefault" className="h-4 w-4 accent-accent-500" /> muss mit
           </label>
           <button className={btn} type="submit">+ Tier</button>
         </form>
-      </section>
+      </Card>
 
       {/* Mobilität */}
-      <section className={card}>
-        <h2 className="font-semibold">Mobilität</h2>
-        <form action={updateMobilityAction} className="space-y-2">
+      <Card className="space-y-3">
+        <h2 className="font-display text-lg font-bold text-white">Mobilität</h2>
+        <form action={updateMobilityAction} className="space-y-3">
           <input type="hidden" name="familyProfileId" value={family.id} />
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-2 gap-2 text-sm text-slate-200">
             <label className="flex items-center gap-2">
-              <input type="checkbox" name="hasCar" defaultChecked={mob?.hasCar ?? true} /> Auto
+              <input type="checkbox" name="hasCar" defaultChecked={mob?.hasCar ?? true} className="h-4 w-4 accent-accent-500" /> 🚗 Auto
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" name="publicTransportOk" defaultChecked={mob?.publicTransportOk ?? true} /> ÖPNV
+              <input type="checkbox" name="publicTransportOk" defaultChecked={mob?.publicTransportOk ?? true} className="h-4 w-4 accent-accent-500" /> 🚆 ÖPNV
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" name="bikeOk" defaultChecked={mob?.bikeOk ?? false} /> Fahrrad
+              <input type="checkbox" name="bikeOk" defaultChecked={mob?.bikeOk ?? false} className="h-4 w-4 accent-accent-500" /> 🚲 Fahrrad
             </label>
             <label className="flex items-center gap-2">
-              <input type="checkbox" name="strollerRequired" defaultChecked={mob?.strollerRequired ?? false} /> Kinderwagen nötig
+              <input type="checkbox" name="strollerRequired" defaultChecked={mob?.strollerRequired ?? false} className="h-4 w-4 accent-accent-500" /> 👶 Kinderwagen
             </label>
           </div>
-          <label className="block text-sm">
+          <label className="block text-sm text-slate-300">
             Max. Fahrzeit (Min)
             <input
               name="maxTravelMinutes"
@@ -164,40 +154,37 @@ export default async function ProfilePage({
               min={5}
               max={180}
               defaultValue={mob?.maxTravelMinutes ?? 45}
-              className={field}
+              className="input-dark mt-1"
             />
           </label>
           <button className={btn} type="submit">Mobilität speichern</button>
         </form>
-      </section>
+      </Card>
 
       {/* Budget */}
-      <section className={card}>
-        <h2 className="font-semibold">Budget</h2>
-        <form action={updateBudgetAction} className="space-y-2">
+      <Card className="space-y-3">
+        <h2 className="font-display text-lg font-bold text-white">Budget</h2>
+        <form action={updateBudgetAction} className="space-y-3">
           <input type="hidden" name="familyProfileId" value={family.id} />
-          <label className="block text-sm">
+          <label className="block text-sm text-slate-300">
             Max. Gesamtbudget (€, leer = egal)
             <input
               name="maxCostTotal"
               type="number"
               min={0}
               defaultValue={bud?.maxCostTotal ?? ""}
-              className={field}
+              className="input-dark mt-1"
             />
           </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="preferFree" defaultChecked={bud?.preferFree ?? false} /> Lieber kostenlos
+          <label className="flex items-center gap-2 text-sm text-slate-200">
+            <input type="checkbox" name="preferFree" defaultChecked={bud?.preferFree ?? false} className="h-4 w-4 accent-accent-500" /> 💚 Lieber kostenlos
           </label>
           <button className={btn} type="submit">Budget speichern</button>
         </form>
-      </section>
+      </Card>
 
-      <Link
-        href={`/recommend/${family.id}`}
-        className="block rounded-lg bg-brand-600 px-4 py-3 text-center font-semibold text-white hover:bg-brand-700"
-      >
-        Was können wir heute machen?
+      <Link href={`/recommend/${family.id}`} className="btn-gradient w-full">
+        ✨ Vorschläge generieren
       </Link>
     </div>
   );

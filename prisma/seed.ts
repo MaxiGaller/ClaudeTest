@@ -36,6 +36,7 @@ interface AttractionSeed {
   foodAvailable: boolean;
   openingHoursText: string | null;
   websiteUrl: string | null;
+  ticketUrl?: string;
   difficulty?: string;
   lengthKm?: number;
   tags: string[];
@@ -59,6 +60,7 @@ interface EventSeed {
   outdoor: boolean;
   foodAvailable: boolean;
   websiteUrl: string | null;
+  ticketUrl?: string;
   startsAt: Date;
   endsAt: Date;
   tags: string[];
@@ -85,6 +87,7 @@ const attractions: AttractionSeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–18 Uhr (saisonabhängig, bitte prüfen)",
     websiteUrl: "https://www.hellabrunn.de",
+    ticketUrl: "https://www.getyourguide.de/muenchen-l34/tierpark-hellabrunn-t000",
     tags: ["animals", "stroller_friendly", "outdoor", "food_available", "toddler_friendly", "baby_friendly", "high_entertainment"],
   },
   {
@@ -107,6 +110,7 @@ const attractions: AttractionSeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–17 Uhr (bitte prüfen)",
     websiteUrl: "https://www.wildpark-poing.de",
+    ticketUrl: "https://www.getyourguide.de/poing-l00/wildpark-poing-t000",
     tags: ["animals", "dog_friendly", "stroller_friendly", "outdoor", "playground", "food_available", "toddler_friendly", "high_entertainment", "requires_car"],
   },
   {
@@ -197,6 +201,7 @@ const attractions: AttractionSeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–17 Uhr (bitte prüfen)",
     websiteUrl: "https://www.deutsches-museum.de",
+    ticketUrl: "https://www.tiqets.com/de/muenchen-attraktionen-c000/deutsches-museum-p000",
     tags: ["culture", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available", "high_entertainment"],
   },
   {
@@ -219,6 +224,7 @@ const attractions: AttractionSeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 10–19 Uhr (bitte prüfen)",
     websiteUrl: null,
+    ticketUrl: "https://www.regiondo.de/indoor-spielplatz-muenchen-000",
     tags: ["playground", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available", "action", "high_entertainment"],
   },
   {
@@ -340,6 +346,7 @@ const events: EventSeed[] = [
     outdoor: false,
     foodAvailable: true,
     websiteUrl: null,
+    ticketUrl: "https://www.eventim.de/event/zirkus-gastspiel-muenchen-000",
     startsAt: inDays(9, 15),
     endsAt: inDays(9, 17),
     tags: ["culture", "high_entertainment", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available"],

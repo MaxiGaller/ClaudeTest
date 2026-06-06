@@ -24,6 +24,8 @@ export interface RawItem {
   startsAt?: string;
   endsAt?: string;
   sourceUrl?: string;
+  /** Rohe Ticketshop-URL, falls die Quelle eine liefert (für Affiliate-Links). */
+  ticketUrl?: string;
   /** Vorab bekannte Kosten in EUR, falls die Quelle sie liefert. */
   estimatedCost?: number;
   /** Optionaler Ausflugs-/Wanderbezug (v. a. Attraktions-Quellen). */
@@ -61,6 +63,7 @@ export interface ClassifiedItem {
   startsAt?: string;
   endsAt?: string;
   sourceUrl?: string;
+  ticketUrl?: string;
   difficulty?: string;
   lengthKm?: number;
   /** Herkunfts-/Unsicherheitshinweis, landet in source. */

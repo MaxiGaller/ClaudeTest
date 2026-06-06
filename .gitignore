@@ -32,3 +32,6 @@ yarn-error.log*
 
 # generierte Vorschau-Snapshots (Deliverable, kein Quellcode)
 /preview/
+
+# Lokale Design-Vorschauen (generierte HTML-Snapshots)
+preview/

@@ -137,6 +137,7 @@ model Attraction {
   foodAvailable            Boolean @default(false)
   openingHoursText         String?
   websiteUrl               String?
+  ticketUrl                String? // rohe Ticketshop-URL; Affiliate-Tracking wird zur Laufzeit ergänzt
   source                   String? // origin / reliability note for the data
 
   // Ausflugs-/Wanderbezug (optional, z. B. aus OSM-Quellen).
@@ -178,6 +179,7 @@ model Event {
   outdoor                  Boolean @default(false)
   foodAvailable            Boolean @default(false)
   websiteUrl               String?
+  ticketUrl                String? // rohe Ticketshop-URL; Affiliate-Tracking wird zur Laufzeit ergänzt
   source                   String?
 
   // Zeitfenster des Events.

@@ -163,6 +163,7 @@ export async function aiClassify(raws: RawItem[]): Promise<ClassifiedItem[]> {
         startsAt: raw.startsAt,
         endsAt: raw.endsAt,
         sourceUrl: raw.sourceUrl,
+        ticketUrl: raw.ticketUrl,
         difficulty: raw.difficulty,
         lengthKm: raw.lengthKm,
         provenance: `KI-angereichert (confidence ${item.confidence.toFixed(2)}) – Preise/Termine ungeprüft`,

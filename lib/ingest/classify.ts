@@ -211,6 +211,7 @@ export function ruleBasedClassify(raw: RawItem): ClassifiedItem {
     startsAt: raw.startsAt,
     endsAt: raw.endsAt,
     sourceUrl: raw.sourceUrl,
+    ticketUrl: raw.ticketUrl,
     difficulty: raw.difficulty,
     lengthKm: raw.lengthKm,
     provenance: RULE_PROVENANCE,

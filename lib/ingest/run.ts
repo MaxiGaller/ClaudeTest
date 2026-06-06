@@ -112,6 +112,7 @@ function commonData(item: ClassifiedItem, region: string, sourceName: string, no
     outdoor: item.outdoor,
     foodAvailable: item.foodAvailable,
     websiteUrl: item.sourceUrl ?? null,
+    ticketUrl: item.ticketUrl ?? null,
     source: item.provenance,
     sourceName,
     sourceUrl: item.sourceUrl ?? null,

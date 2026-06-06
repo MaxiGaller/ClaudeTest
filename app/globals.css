@@ -3,9 +3,41 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-ink-950 text-slate-200 antialiased;
+  /* Sanfte Grün-/Blau-Glows oben, damit die Fläche nicht flach wirkt. */
+  background-image:
+    radial-gradient(1100px 560px at 50% -8%, rgba(16, 185, 129, 0.13), transparent 60%),
+    radial-gradient(900px 520px at 50% 2%, rgba(14, 165, 233, 0.12), transparent 55%);
+  background-attachment: fixed;
+}
+
+@layer components {
+  /* Verlaufstext für Headlines (Grün -> Blau). */
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent-300 via-accent-400 to-brand-400 bg-clip-text text-transparent;
+  }
+
+  /* Primärer Aktions-Button mit Grün-/Türkis-Verlauf. */
+  .btn-gradient {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent-500 to-teal-500 px-5 py-3 font-semibold text-white shadow-glow transition hover:from-accent-400 hover:to-teal-400 active:scale-[0.99];
+  }
+
+  /* Sekundär-Button (dezent, umrandet). */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.03] px-5 py-3 font-medium text-slate-200 transition hover:border-white/25 hover:bg-white/[0.06];
+  }
+
+  /* Karten-Grundfläche (Glas-Optik auf dunklem Grund). */
+  .surface {
+    @apply rounded-2xl border border-white/10 bg-white/[0.035] shadow-card backdrop-blur;
+  }
+
+  /* Formularfelder einheitlich dunkel. */
+  .input-dark {
+    @apply w-full rounded-xl border border-white/[0.12] bg-ink-850/80 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-brand-400/60 focus:ring-2 focus:ring-brand-400/20;
+  }
 }

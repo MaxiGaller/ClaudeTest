@@ -29,6 +29,7 @@ app/
 lib/
   scoring.ts                Reine Scoring-Logik (Score + reasons + warnings)
   feed.ts                   Vereint Attraktion + Event auf die Scoring-Eingabe
+  affiliate.ts              Ticket-/Affiliate-Links (Netzwerk-Registry, Partner-IDs aus Env)
   regions.ts                Region-Registry (config-getrieben; aktuell nur München aktiv)
   geo.ts                    Haversine + grobe Fahrzeitschätzung
   recommend.ts              Bindeglied: DB + Geo + Scoring -> Empfehlungslauf
@@ -171,6 +172,20 @@ Berücksichtigt werden u. a.:
 
 `buildExplanation()` formt daraus einen lesbaren Satz, `rankActivities()`
 sortiert und filtert nicht-eignungsfähige Treffer.
+
+## Ticket-/Affiliate-Links
+
+Ticketpflichtige Ziele (Zoo, Museum, Zirkus, Indoor-Spielplatz …) können eine rohe
+Ticketshop-URL tragen (`ticketUrl`). `lib/affiliate.ts` erkennt anhand der Domain das
+Netzwerk (GetYourGuide, Tiqets, Eventim, Regiondo) und hängt den Tracking-Parameter
+mit der **Partner-ID aus der Umgebung** an (`AFFILIATE_*_ID`). Ohne konfigurierte ID
+wird die rohe URL ohne Provision verlinkt – das Gerüst funktioniert also auch ohne
+echte Partneraccounts.
+
+Auf der Detailseite erscheint dann ein **„🎟 Tickets kaufen"**-Button. Affiliate-Links
+sind als **„Anzeige · Affiliate-Link"** gekennzeichnet (gesetzlich nötig) und tragen
+`rel="sponsored"`. Die konkreten Tracking-Parameter je Programm sind ein Startpunkt und
+vor Live-Schaltung gegen die jeweiligen Partnerbedingungen zu prüfen.
 
 ## Datenqualität / Hinweis
 
