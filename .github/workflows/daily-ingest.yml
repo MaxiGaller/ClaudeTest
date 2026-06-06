@@ -1,0 +1,31 @@
+name: Daily Content Ingestion
+
+# Zentraler Tagesjob: beschafft Events und dauerhafte Ausflugsziele pro Region,
+# reichert sie an und schreibt sie in die DB. Läuft einmal täglich – die
+# personalisierte Auswahl bleibt im App-Backend deterministisch.
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # täglich ~06:00 Lokalzeit (04:00 UTC)
+  workflow_dispatch: {} # manuell auslösbar
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      INGEST_REGION: ${{ vars.INGEST_REGION }} # leer = alle aktiven Regionen
+      EVENT_FEED_URL: ${{ secrets.EVENT_FEED_URL }}
+      OVERPASS_API_URL: ${{ vars.OVERPASS_API_URL }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run ingest

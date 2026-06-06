@@ -1,0 +1,54 @@
+[
+  {
+    "externalId": "fix-sommerfest-westpark",
+    "name": "Familien-Sommerfest im Westpark",
+    "description": "Kostenloses Sommerfest mit Spielplatz, Musik und Imbiss. Kinderwagen- und hundefreundlich, ideal für Kleinkinder.",
+    "categoryHint": "Fest",
+    "address": "Westpark, 81373 München",
+    "latitude": 48.1219,
+    "longitude": 11.5219,
+    "startsAt": "2026-07-04T10:00:00+02:00",
+    "endsAt": "2026-07-04T18:00:00+02:00",
+    "sourceUrl": "https://example.org/events/sommerfest-westpark",
+    "estimatedCost": 0
+  },
+  {
+    "externalId": "fix-bauernhof-tag",
+    "name": "Tag der offenen Tür am Erlebnisbauernhof",
+    "description": "Tiere zum Anfassen, Hofladen und Ponyreiten für Familien mit kleinen Kindern. Draußen, bei Regen eingeschränkt.",
+    "categoryHint": "Bauernhof",
+    "address": "Umland München",
+    "latitude": 48.22,
+    "longitude": 11.7,
+    "startsAt": "2026-06-20T09:00:00+02:00",
+    "endsAt": "2026-06-20T16:00:00+02:00",
+    "sourceUrl": "https://example.org/events/bauernhof-tag",
+    "estimatedCost": 8
+  },
+  {
+    "externalId": "fix-indoor-kletter",
+    "name": "Indoor-Kletterhalle Kinderaktion",
+    "description": "Klettern und Toben in der Halle – wetterunabhängig, viel Action. Für Kinder ab 3 Jahren.",
+    "categoryHint": "Indoor",
+    "address": "München Nord",
+    "latitude": 48.18,
+    "longitude": 11.61,
+    "startsAt": "2026-06-15T10:00:00+02:00",
+    "endsAt": "2026-06-15T19:00:00+02:00",
+    "sourceUrl": "https://example.org/events/indoor-kletter",
+    "estimatedCost": 18
+  },
+  {
+    "externalId": "fix-floh-vergangen",
+    "name": "Frühlings-Flohmarkt (bereits vorbei)",
+    "description": "Stöbern und Schnäppchen auf dem Flohmarkt. Draußen, hundefreundlich.",
+    "categoryHint": "Flohmarkt",
+    "address": "München Zentrum",
+    "latitude": 48.14,
+    "longitude": 11.56,
+    "startsAt": "2026-03-01T08:00:00+01:00",
+    "endsAt": "2026-03-01T14:00:00+01:00",
+    "sourceUrl": "https://example.org/events/fruehlings-flohmarkt",
+    "estimatedCost": 0
+  }
+]

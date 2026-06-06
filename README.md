@@ -23,18 +23,68 @@ app/
   page.tsx                  Dashboard (Profile wählen / anlegen)
   profile/[id]/page.tsx     Familienprofil verwalten (Personen, Tiere, Mobilität, Budget)
   recommend/[id]/page.tsx   Empfehlung starten (Zeit, Budget, Hund, Wetter, Tagesform …)
-  results/[runId]/page.tsx  Top-5-Vorschläge mit Score, Begründung, Warnungen, Feedback
-  activity/[id]/page.tsx    Aktivitätsdetail
+  results/[runId]/page.tsx  Top-Vorschläge mit Score, Begründung, Warnungen, Feedback
+  item/[type]/[id]/page.tsx Detailseite (Attraktion oder Event)
   actions.ts                Server Actions (Empfehlung, Feedback, Profil-Updates)
 lib/
   scoring.ts                Reine Scoring-Logik (Score + reasons + warnings)
-  scoring.test.ts           Vitest-Tests der Scoring-Logik
+  feed.ts                   Vereint Attraktion + Event auf die Scoring-Eingabe
+  regions.ts                Region-Registry (config-getrieben; aktuell nur München aktiv)
   geo.ts                    Haversine + grobe Fahrzeitschätzung
   recommend.ts              Bindeglied: DB + Geo + Scoring -> Empfehlungslauf
   prisma.ts                 Prisma-Client (Singleton)
+  ingest/                   Täglicher Ingestion-Job (Quellen, Klassifikation, Upsert)
+    run.ts                  Orchestrator: pro Region zwei Pipelines (Events / Attraktionen)
+    classify.ts             Regelbasierte Anreicherung (Fallback + Testanker)
+    ai.ts                   Optionaler, gebündelter Claude-Call (Structured Output)
+    sources/                Quellen-Adapter (Fixtures + Gerüste für Feed/Overpass)
+scripts/
+  ingest.ts                 Entry-Point des Tagesjobs (npm run ingest)
 prisma/
   schema.prisma             Datenmodell
   seed.ts                   Seed-Daten München/Südbayern + Demo-Familie
+.github/workflows/
+  daily-ingest.yml          Cron-Job (täglich) für die Ingestion
+```
+
+## Datenmodell: zwei Tabellen, ein Feed
+
+Inhalte liegen in zwei Tabellen, die der Empfehlungs-Feed vereint:
+
+- **`Attraction`** – dauerhafte Ausflugsziele (Zoo, Spielplatz, Wanderung, Badesee …).
+- **`Event`** – zeitbegrenzte Veranstaltungen (Flohmarkt, Zirkus, Fest …); laufen
+  nach `validUntil` ab und werden vom Tagesjob geprunt.
+
+Beide tragen ein `region`-Feld (siehe `lib/regions.ts`). Tags (`ItemTag`),
+Bewertungen (`Review`) und Empfehlungsergebnisse verweisen **polymorph**
+(`itemType` + `itemId`) auf eines der beiden, sodass der Feed einheitlich bleibt.
+`lib/feed.ts` bildet beide Tabellen auf die gemeinsame Scoring-Eingabe ab (ID
+z. B. `attraction:<id>` / `event:<id>`) – das Scoring selbst kennt den Unterschied
+nicht.
+
+## Täglicher Ingestion-Job
+
+Ein zentraler Job (lokal `npm run ingest` oder via GitHub-Actions-Cron) beschafft
+Inhalte – **nicht** pro Nutzer. Er ist region-agnostisch und läuft über alle aktiven
+Regionen (`lib/regions.ts`). Pro Region zwei Pipelines mit je eigener Quellen-Familie:
+
+- **Events** (heute/zukünftig) → Tabelle `Event`, abgelaufene werden entfernt.
+- **Attraktionen** (evergreen) → Tabelle `Attraction`, kein Datums-Pruning.
+
+Quellen liefern rohe Kandidaten, die **dedupliziert**, **angereichert** und
+idempotent **upgesertet** werden (per `sourceName` + `externalId`). Mitgeliefert sind
+Offline-Fixtures sowie Gerüste für echte Quellen (`muenchen-open-data` via
+`EVENT_FEED_URL`, OSM-Ausflugsziele via `OVERPASS_API_URL`); nicht konfigurierte
+Quellen werden übersprungen, ohne den Lauf abzubrechen.
+
+Die **KI-Anreicherung** ist optional und passiert ausschließlich hier (ein
+gebündelter Claude-Call mit Structured Output, Modell aus `ANTHROPIC_MODEL`). Ohne
+`ANTHROPIC_API_KEY` greift der deterministische, regelbasierte Fallback. Der
+**Nutzerpfad bleibt KI-frei und deterministisch.**
+
+```bash
+npm run ingest               # alle aktiven Regionen
+INGEST_REGION=muenchen npm run ingest   # nur eine Region
 ```
 
 ## Schnellstart
@@ -66,7 +116,7 @@ cp .env.example .env
 ### 4. Schema anlegen + Seed-Daten laden
 ```bash
 npm run db:push     # Schema in die DB schreiben
-npm run db:seed     # Beispielaktivitäten + Demo-Familie anlegen
+npm run db:seed     # Beispiel-Attraktionen/-Events + Demo-Familie anlegen
 ```
 Praktisch: `npm run db:reset` setzt die DB zurück und seedet neu.
 
@@ -125,7 +175,7 @@ sortiert und filtert nicht-eignungsfähige Treffer.
 ## Datenqualität / Hinweis
 
 Die Seed-Daten sind **realistisch strukturiert, aber nicht verifiziert**.
-Preise und Öffnungszeiten sind Platzhalter (siehe Feld `source` je Aktivität)
+Preise und Öffnungszeiten sind Platzhalter (siehe Feld `source` je Eintrag)
 und vor echter Nutzung zu prüfen. Die App-Struktur steht im Vordergrund, nicht
 perfekte Daten.
 

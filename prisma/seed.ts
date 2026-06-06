@@ -1,19 +1,70 @@
 /**
  * Seed-Daten für das MVP – Region München / Südbayern.
  *
+ * Zwei Inhaltstabellen:
+ *   - Attraction: dauerhafte Ausflugsziele (evergreen)
+ *   - Event:      zeitbegrenzte Veranstaltungen (Beispiel-Termine)
+ * Tags liegen polymorph in ItemTag (itemType + itemId).
+ *
  * Hinweis: Preise und Öffnungszeiten sind grobe Platzhalter und KEINE harte
  * Wahrheit. Vor echter Nutzung verifizieren. Das Feld `source` markiert die
  * Datenherkunft/Unsicherheit.
  */
-import { PrismaClient, type Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 const SEED_SOURCE = "seed-placeholder: Preise/Öffnungszeiten ungeprüft";
+const REGION = "muenchen";
 
-type ActivitySeed = Omit<Prisma.ActivityCreateInput, "tags"> & { tags: string[] };
+interface AttractionSeed {
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  estimatedCost: number;
+  estimatedDurationMinutes: number;
+  minChildAgeMonths: number;
+  maxChildAgeMonths: number;
+  dogFriendly: boolean;
+  strollerFriendly: boolean;
+  rainSafe: boolean;
+  indoor: boolean;
+  outdoor: boolean;
+  foodAvailable: boolean;
+  openingHoursText: string | null;
+  websiteUrl: string | null;
+  difficulty?: string;
+  lengthKm?: number;
+  tags: string[];
+}
 
-const activities: ActivitySeed[] = [
+interface EventSeed {
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  estimatedCost: number;
+  estimatedDurationMinutes: number;
+  minChildAgeMonths: number;
+  maxChildAgeMonths: number;
+  dogFriendly: boolean;
+  strollerFriendly: boolean;
+  rainSafe: boolean;
+  indoor: boolean;
+  outdoor: boolean;
+  foodAvailable: boolean;
+  websiteUrl: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  tags: string[];
+}
+
+const attractions: AttractionSeed[] = [
   {
     name: "Tierpark Hellabrunn",
     description:
@@ -34,7 +85,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–18 Uhr (saisonabhängig, bitte prüfen)",
     websiteUrl: "https://www.hellabrunn.de",
-    source: SEED_SOURCE,
     tags: ["animals", "stroller_friendly", "outdoor", "food_available", "toddler_friendly", "baby_friendly", "high_entertainment"],
   },
   {
@@ -57,7 +107,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–17 Uhr (bitte prüfen)",
     websiteUrl: "https://www.wildpark-poing.de",
-    source: SEED_SOURCE,
     tags: ["animals", "dog_friendly", "stroller_friendly", "outdoor", "playground", "food_available", "toddler_friendly", "high_entertainment", "requires_car"],
   },
   {
@@ -80,7 +129,8 @@ const activities: ActivitySeed[] = [
     foodAvailable: false,
     openingHoursText: "jederzeit zugänglich",
     websiteUrl: null,
-    source: SEED_SOURCE,
+    difficulty: "easy",
+    lengthKm: 4,
     tags: ["dog_friendly", "stroller_friendly", "outdoor", "free", "quiet", "nap_compatible", "baby_friendly"],
   },
   {
@@ -103,7 +153,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "jederzeit zugänglich",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["playground", "free", "outdoor", "dog_friendly", "stroller_friendly", "toddler_friendly", "food_available", "action"],
   },
   {
@@ -112,8 +161,8 @@ const activities: ActivitySeed[] = [
       "Familienfreundlicher Bauernhof im Umland mit Tieren zum Anschauen und Hofladen. Gut für kleine Kinder.",
     category: "Bauernhöfe / Erlebnisbauernhöfe",
     address: "Umland München (Platzhalter-Adresse)",
-    latitude: 48.2200,
-    longitude: 11.7000,
+    latitude: 48.22,
+    longitude: 11.7,
     estimatedCost: 10,
     estimatedDurationMinutes: 150,
     minChildAgeMonths: 6,
@@ -126,7 +175,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "variiert je nach Hof (bitte prüfen)",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["animals", "low_budget", "outdoor", "stroller_friendly", "toddler_friendly", "food_available", "requires_car"],
   },
   {
@@ -149,7 +197,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 9–17 Uhr (bitte prüfen)",
     websiteUrl: "https://www.deutsches-museum.de",
-    source: SEED_SOURCE,
     tags: ["culture", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available", "high_entertainment"],
   },
   {
@@ -158,8 +205,8 @@ const activities: ActivitySeed[] = [
       "Großer überdachter Indoor-Spielplatz mit Klettergerüsten, Rutschen und Bällebad. Perfekt bei Regen.",
     category: "Indoor-Spielplätze",
     address: "Großraum München (Platzhalter-Adresse)",
-    latitude: 48.1800,
-    longitude: 11.6100,
+    latitude: 48.18,
+    longitude: 11.61,
     estimatedCost: 25,
     estimatedDurationMinutes: 180,
     minChildAgeMonths: 12,
@@ -172,7 +219,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 10–19 Uhr (bitte prüfen)",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["playground", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available", "action", "high_entertainment"],
   },
   {
@@ -195,31 +241,7 @@ const activities: ActivitySeed[] = [
     foodAvailable: false,
     openingHoursText: "jederzeit zugänglich (Saison Sommer)",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["water", "free", "outdoor", "stroller_friendly", "toddler_friendly", "baby_friendly", "nap_compatible"],
-  },
-  {
-    name: "Flohmarkt / Trödelmarkt",
-    description:
-      "Wechselnder Flohmarkt im Münchner Raum. Stöbern, schlendern, Schnäppchen – meist am Wochenende.",
-    category: "Märkte / Flohmärkte",
-    address: "wechselnde Orte München (bitte prüfen)",
-    latitude: 48.1400,
-    longitude: 11.5600,
-    estimatedCost: 0,
-    estimatedDurationMinutes: 120,
-    minChildAgeMonths: 0,
-    maxChildAgeMonths: 216,
-    dogFriendly: true,
-    strollerFriendly: true,
-    rainSafe: false,
-    indoor: false,
-    outdoor: true,
-    foodAvailable: true,
-    openingHoursText: "meist Wochenende vormittags (bitte prüfen)",
-    websiteUrl: null,
-    source: SEED_SOURCE,
-    tags: ["market", "free", "outdoor", "dog_friendly", "stroller_friendly", "food_available", "quiet"],
   },
   {
     name: "Biergarten mit Spielplatz (z. B. Hirschgarten)",
@@ -241,7 +263,6 @@ const activities: ActivitySeed[] = [
     foodAvailable: true,
     openingHoursText: "ca. 11–23 Uhr (saison-/wetterabhängig)",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["restaurant", "playground", "dog_friendly", "stroller_friendly", "outdoor", "food_available", "low_budget", "toddler_friendly"],
   },
   {
@@ -251,7 +272,7 @@ const activities: ActivitySeed[] = [
     category: "kurze Notfallideen für 1–2 Stunden",
     address: "wohnortnah (Platzhalter)",
     latitude: 48.1351,
-    longitude: 11.5820,
+    longitude: 11.582,
     estimatedCost: 0,
     estimatedDurationMinutes: 60,
     minChildAgeMonths: 6,
@@ -264,28 +285,109 @@ const activities: ActivitySeed[] = [
     foodAvailable: false,
     openingHoursText: "jederzeit zugänglich",
     websiteUrl: null,
-    source: SEED_SOURCE,
     tags: ["playground", "free", "outdoor", "dog_friendly", "stroller_friendly", "toddler_friendly", "action"],
+  },
+];
+
+// Beispiel-Events mit Terminen relativ zu heute, damit sie im Feed aktiv sind.
+function inDays(days: number, hour: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
+
+const events: EventSeed[] = [
+  {
+    name: "Flohmarkt am Riem",
+    description:
+      "Großer Wochenend-Flohmarkt zum Stöbern und Schlendern. Draußen, hundefreundlich, kostenloser Eintritt.",
+    category: "Märkte / Flohmärkte",
+    address: "Am Messesee, 81829 München",
+    latitude: 48.14,
+    longitude: 11.56,
+    estimatedCost: 0,
+    estimatedDurationMinutes: 120,
+    minChildAgeMonths: 0,
+    maxChildAgeMonths: 216,
+    dogFriendly: true,
+    strollerFriendly: true,
+    rainSafe: false,
+    indoor: false,
+    outdoor: true,
+    foodAvailable: true,
+    websiteUrl: null,
+    startsAt: inDays(5, 8),
+    endsAt: inDays(5, 14),
+    tags: ["market", "free", "outdoor", "dog_friendly", "stroller_friendly", "food_available", "quiet"],
+  },
+  {
+    name: "Zirkus-Gastspiel für Familien",
+    description:
+      "Buntes Zirkusprogramm mit Akrobatik und Clowns – drinnen im Zelt, daher auch bei Regen ein Erlebnis. Für Kinder ab 3 Jahren.",
+    category: "kostenlose Events",
+    address: "Festplatz, München",
+    latitude: 48.131,
+    longitude: 11.55,
+    estimatedCost: 22,
+    estimatedDurationMinutes: 120,
+    minChildAgeMonths: 36,
+    maxChildAgeMonths: 180,
+    dogFriendly: false,
+    strollerFriendly: true,
+    rainSafe: true,
+    indoor: true,
+    outdoor: false,
+    foodAvailable: true,
+    websiteUrl: null,
+    startsAt: inDays(9, 15),
+    endsAt: inDays(9, 17),
+    tags: ["culture", "high_entertainment", "indoor", "rain_safe", "stroller_friendly", "toddler_friendly", "food_available"],
   },
 ];
 
 async function main() {
   console.log("Seeding…");
 
-  // Idempotent: vorhandene Aktivitäten/Tags zurücksetzen.
-  await prisma.activityTag.deleteMany();
-  await prisma.activity.deleteMany();
+  // Idempotent: vorhandene Inhalte/Tags zurücksetzen.
+  await prisma.itemTag.deleteMany();
+  await prisma.attraction.deleteMany();
+  await prisma.event.deleteMany();
 
-  for (const a of activities) {
+  for (const a of attractions) {
     const { tags, ...data } = a;
-    await prisma.activity.create({
+    const created = await prisma.attraction.create({
+      data: { ...data, region: REGION, source: SEED_SOURCE, sourceName: "seed", externalId: a.name },
+    });
+    if (tags.length > 0) {
+      await prisma.itemTag.createMany({
+        data: tags.map((tag) => ({ itemType: "attraction" as const, itemId: created.id, tag })),
+        skipDuplicates: true,
+      });
+    }
+  }
+  console.log(`  ${attractions.length} Attraktionen angelegt.`);
+
+  for (const e of events) {
+    const { tags, ...data } = e;
+    const created = await prisma.event.create({
       data: {
         ...data,
-        tags: { create: tags.map((tag) => ({ tag })) },
+        region: REGION,
+        source: SEED_SOURCE,
+        sourceName: "seed",
+        externalId: e.name,
+        validUntil: e.endsAt,
       },
     });
+    if (tags.length > 0) {
+      await prisma.itemTag.createMany({
+        data: tags.map((tag) => ({ itemType: "event" as const, itemId: created.id, tag })),
+        skipDuplicates: true,
+      });
+    }
   }
-  console.log(`  ${activities.length} Aktivitäten angelegt.`);
+  console.log(`  ${events.length} Events angelegt.`);
 
   // Demo-User + Familienprofil (idempotent über email/upsert).
   const user = await prisma.user.upsert({

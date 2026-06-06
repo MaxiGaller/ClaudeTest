@@ -1,0 +1,41 @@
+[
+  {
+    "externalId": "attr-partnachklamm",
+    "name": "Partnachklamm",
+    "description": "Spektakuläre Klamm bei Garmisch-Partenkirchen. Schmaler Weg an tosendem Wasser entlang – beeindruckend für Kinder, festes Schuhwerk nötig. Nicht kinderwagentauglich.",
+    "categoryHint": "Wanderung",
+    "address": "Partnachklamm, 82467 Garmisch-Partenkirchen",
+    "latitude": 47.4847,
+    "longitude": 11.1228,
+    "sourceUrl": "https://example.org/attractions/partnachklamm",
+    "estimatedCost": 12,
+    "difficulty": "moderate",
+    "lengthKm": 3.0
+  },
+  {
+    "externalId": "attr-walderlebniszentrum-gruenwald",
+    "name": "Walderlebniszentrum Grünwald",
+    "description": "Familienfreundlicher Walderlebnispfad südlich von München. Stationen zum Mitmachen, ruhige Wege, gut für kleine Kinder und Kinderwagen geeignet.",
+    "categoryHint": "Wald Spaziergang Naturpark",
+    "address": "Sauschütt, 82031 Grünwald",
+    "latitude": 48.0289,
+    "longitude": 11.5256,
+    "sourceUrl": "https://example.org/attractions/walderlebnis-gruenwald",
+    "estimatedCost": 0,
+    "difficulty": "easy",
+    "lengthKm": 2.5
+  },
+  {
+    "externalId": "attr-isarauen-spaziergang",
+    "name": "Isarauen-Spaziergang Thalkirchen",
+    "description": "Ruhiger Spaziergang an der Isar mit Kiesbänken zum Steine-Werfen. Hundefreundlich, schattig, jederzeit zugänglich und kostenlos.",
+    "categoryHint": "Spaziergang Fluss Natur Hund",
+    "address": "Isarauen, 81379 München",
+    "latitude": 48.0931,
+    "longitude": 11.5436,
+    "sourceUrl": "https://example.org/attractions/isarauen",
+    "estimatedCost": 0,
+    "difficulty": "easy",
+    "lengthKm": 4.0
+  }
+]

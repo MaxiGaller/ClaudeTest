@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { submitReviewAction } from "@/app/actions";
+import { feedId, type FeedItemType } from "@/lib/feed";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,13 @@ const FEEDBACK = [
   { type: "never_again", label: "🚫 nie wieder" },
 ] as const;
 
+interface ItemMeta {
+  name: string;
+  category: string;
+  estimatedCost: number;
+  estimatedDurationMinutes: number;
+}
+
 export default async function ResultsPage({
   params,
 }: {
@@ -37,13 +45,32 @@ export default async function ResultsPage({
     where: { id: params.runId },
     include: {
       familyProfile: true,
-      results: {
-        orderBy: { score: "desc" },
-        include: { activity: true },
-      },
+      results: { orderBy: { score: "desc" } },
     },
   });
   if (!run) notFound();
+
+  // Item-Metadaten (Name, Kategorie, Kosten) für beide Tabellen nachladen.
+  const attractionIds = run.results.filter((r) => r.itemType === "attraction").map((r) => r.itemId);
+  const eventIds = run.results.filter((r) => r.itemType === "event").map((r) => r.itemId);
+  const select = {
+    id: true,
+    name: true,
+    category: true,
+    estimatedCost: true,
+    estimatedDurationMinutes: true,
+  };
+  const [attractions, events] = await Promise.all([
+    attractionIds.length
+      ? prisma.attraction.findMany({ where: { id: { in: attractionIds } }, select })
+      : Promise.resolve([]),
+    eventIds.length
+      ? prisma.event.findMany({ where: { id: { in: eventIds } }, select })
+      : Promise.resolve([]),
+  ]);
+  const meta = new Map<string, ItemMeta>();
+  for (const a of attractions) meta.set(feedId("attraction", a.id), a);
+  for (const e of events) meta.set(feedId("event", e.id), e);
 
   return (
     <div className="space-y-5">
@@ -67,6 +94,8 @@ export default async function ResultsPage({
       <ul className="space-y-4">
         {run.results.map((r) => {
           const warnings = parseWarnings(r.warnings);
+          const m = meta.get(feedId(r.itemType as FeedItemType, r.itemId));
+          if (!m) return null;
           return (
             <li
               key={r.id}
@@ -75,12 +104,14 @@ export default async function ResultsPage({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <Link
-                    href={`/activity/${r.activity.id}`}
+                    href={`/item/${r.itemType}/${r.itemId}`}
                     className="font-semibold hover:underline"
                   >
-                    {r.activity.name}
+                    {m.name}
                   </Link>
-                  <p className="text-xs text-slate-400">{r.activity.category}</p>
+                  <p className="text-xs text-slate-400">
+                    {r.itemType === "event" ? "🗓 Event" : "📍 Ausflugsziel"} · {m.category}
+                  </p>
                 </div>
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${scoreColor(r.score)}`}
@@ -93,8 +124,8 @@ export default async function ResultsPage({
               <p className="mt-2 text-sm text-slate-700">{r.explanation}</p>
 
               <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-                <span>💶 {r.activity.estimatedCost === 0 ? "kostenlos" : `~${r.activity.estimatedCost} €`}</span>
-                <span>⏱ ~{Math.round(r.activity.estimatedDurationMinutes / 60)} Std</span>
+                <span>💶 {m.estimatedCost === 0 ? "kostenlos" : `~${m.estimatedCost} €`}</span>
+                <span>⏱ ~{Math.round(m.estimatedDurationMinutes / 60)} Std</span>
               </div>
 
               {warnings.length > 0 && (
@@ -114,7 +145,8 @@ export default async function ResultsPage({
                 {FEEDBACK.map((f) => (
                   <form key={f.type} action={submitReviewAction}>
                     <input type="hidden" name="familyProfileId" value={run.familyProfileId} />
-                    <input type="hidden" name="activityId" value={r.activity.id} />
+                    <input type="hidden" name="itemType" value={r.itemType} />
+                    <input type="hidden" name="itemId" value={r.itemId} />
                     <input type="hidden" name="feedbackType" value={f.type} />
                     <button
                       type="submit"

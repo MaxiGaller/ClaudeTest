@@ -52,19 +52,22 @@ export async function runRecommendationAction(formData: FormData) {
   redirect(`/results/${runId}`);
 }
 
-/** Nutzerbewertung zu einer Aktivität speichern. */
+/** Nutzerbewertung zu einem Feed-Item (Attraktion oder Event) speichern. */
 export async function submitReviewAction(formData: FormData) {
   const userId = await getDemoUserId();
   const familyProfileId = str(formData, "familyProfileId");
-  const activityId = str(formData, "activityId");
+  const itemType = (str(formData, "itemType") === "event" ? "event" : "attraction") as
+    | "attraction"
+    | "event";
+  const itemId = str(formData, "itemId");
   const feedbackType = str(formData, "feedbackType") as
     | "fits"
     | "not_fitting"
     | "more_like_this"
     | "never_again";
 
-  await prisma.activityReview.create({
-    data: { userId, familyProfileId, activityId, feedbackType },
+  await prisma.review.create({
+    data: { userId, familyProfileId, itemType, itemId, feedbackType },
   });
 
   revalidatePath(`/results`);
